@@ -143,7 +143,7 @@ namespace LibraryAPI.Services
 			}
 		}
 
-		public static string DeleteBook(int id)
+		public static string UpdateCheckout(int id, int checkedOut, DateTime? outDate, DateTime? dueDate)
 		{
 			var connectionStrings = @"Server=localhost\SQLEXPRESS;Database=Libary;Trusted_Connection=True;";
 			using (var connection = new SqlConnection(connectionStrings))
@@ -152,8 +152,12 @@ namespace LibraryAPI.Services
 				{
 					cmd.Connection = connection;
 					cmd.CommandType = System.Data.CommandType.Text;
-					cmd.CommandText = @"DELETE FROM Catalog WHERE Id = @id";
+					cmd.CommandText = @"UPDATE Catalog SET IsCheckedOut=@IsCheckedOut, LastCheckedOutDate=@LastCheckedOutDate, DueBackDate=@DueBackDate " +
+										"WHERE Id = @Id";
 
+					cmd.Parameters.AddWithValue("@IsCheckedOut", checkedOut);
+					cmd.Parameters.AddWithValue("@LastCheckedOutDate", outDate);
+					cmd.Parameters.AddWithValue("@DueBackDate", dueDate);
 					cmd.Parameters.AddWithValue("@Id", id);
 
 					connection.Open();
@@ -162,14 +166,87 @@ namespace LibraryAPI.Services
 
 					if (rowsAffected > 0)
 					{
-						return "Your Book was Deleted";
+						return "Your Book was Updated";
 					}
 					else
 					{
-						return "The Deletion of your Book Failed!";
+						return "The Update for your Book Failed!";
 					}
 				}
 			}
 		}
+
+		public static string CheckInOrOut(int id, string action)
+		{
+			// Get current info for the book requested
+			Books = BuildBookList(@"SELECT * from Catalog WHERE Id = id");
+			if (Books.Count < 1)
+			{
+				// The book was not found. Set a message and do nothing else
+				var message = "Requested Book Does Not Exist";
+			}
+			else
+
+			if (action.ToLower().Equals("in"))
+			{
+				// Check in the book. Set IsCheckedOut to false and update book
+				var checkedOut = 0;
+				var outDate = Books[0].LastCheckedOutDate;
+				var dueDate = Books[0].DueBackDate;
+				var message = UpdateCheckout(id, checkedOut, outDate, dueDate);
+			}
+			else if (action.ToLower().Equals("out"))
+
+				// Checkout requested.  If the book is already checked out, return a message, otherwide update the database to checkout book
+				if (Books[0].IsCheckedOut)
+				{
+					var message = $"This books is already checked out. Return date is {Books[0].DueBackDate})";
+				}
+				else
+				{
+
+					// Check out the book. Set IsCheckedOut to false and update book
+					var checkedOut = 1;
+					var outDate = DateTime.Today.Date;
+					var dueDate = outDate.AddDays(10);
+					var message = UpdateCheckout(id, checkedOut, outDate, dueDate);
+				}
+			else
+			{
+				// the action requested was neither IN nor OUT, so it is invalid
+				var message = "Invalid Checkout Action Requested";
+			}
+			return message;
+		}
+
+
+public static string DeleteBook(int id)
+{
+	var connectionStrings = @"Server=localhost\SQLEXPRESS;Database=Libary;Trusted_Connection=True;";
+	using (var connection = new SqlConnection(connectionStrings))
+	{
+		using (var cmd = new SqlCommand())
+		{
+			cmd.Connection = connection;
+			cmd.CommandType = System.Data.CommandType.Text;
+			cmd.CommandText = @"DELETE FROM Catalog WHERE Id = @id";
+
+			cmd.Parameters.AddWithValue("@Id", id);
+
+			connection.Open();
+			var rowsAffected = cmd.ExecuteNonQuery();
+			connection.Close();
+
+			if (rowsAffected > 0)
+			{
+				return "Your Book was Deleted";
+			}
+			else
+			{
+				return "The Deletion of your Book Failed!";
+			}
+		}
+	}
+}
 	}
 }

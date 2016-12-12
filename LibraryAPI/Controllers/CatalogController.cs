@@ -52,7 +52,15 @@ namespace LibraryAPI.Controllers
 			return Ok(message);
 
 		}
-		
+
+		[HttpPost]
+		public IHttpActionResult CheckInOrOut(int id, string action)
+		{
+			var message = BookService.CheckInOrOut(id, action);
+			return Ok(message);
+
+		}
+
 		[HttpDelete]
 		public IHttpActionResult DeleteBook(int id)
 		{
