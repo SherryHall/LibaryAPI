@@ -56,7 +56,7 @@ namespace LibraryAPI.Controllers
 		[HttpDelete]
 		public IHttpActionResult DeleteBook(int id)
 		{
-			//People = People.Where(w => w.Id != id).ToList();
+			var message = BookService.DeleteBook(id);
 			return Ok();
 		}
 		

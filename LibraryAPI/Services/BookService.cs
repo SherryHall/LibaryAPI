@@ -142,5 +142,34 @@ namespace LibraryAPI.Services
 				}
 			}
 		}
+
+		public static string DeleteBook(int id)
+		{
+			var connectionStrings = @"Server=localhost\SQLEXPRESS;Database=Libary;Trusted_Connection=True;";
+			using (var connection = new SqlConnection(connectionStrings))
+			{
+				using (var cmd = new SqlCommand())
+				{
+					cmd.Connection = connection;
+					cmd.CommandType = System.Data.CommandType.Text;
+					cmd.CommandText = @"DELETE FROM Catalog WHERE Id = @id";
+
+					cmd.Parameters.AddWithValue("@Id", id);
+
+					connection.Open();
+					var rowsAffected = cmd.ExecuteNonQuery();
+					connection.Close();
+
+					if (rowsAffected > 0)
+					{
+						return "Your Book was Deleted";
+					}
+					else
+					{
+						return "The Deletion of your Book Failed!";
+					}
+				}
+			}
+		}
 	}
 }
