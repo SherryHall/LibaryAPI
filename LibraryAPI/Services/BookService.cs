@@ -74,7 +74,6 @@ namespace LibraryAPI.Services
 
 		public static string AddBook(string title, string author, string genre, int yearPublished)
 		{
-			//var returnCode = BuildBookListList($@"INSERT INTO Catalog")
 			var connectionStrings = @"Server=localhost\SQLEXPRESS;Database=Libary;Trusted_Connection=True;";
 			using (var connection = new SqlConnection(connectionStrings))
 			{
@@ -101,6 +100,44 @@ namespace LibraryAPI.Services
 					else
 					{
 						return "The Insert for your Book Failed!";
+					}
+				}
+			}
+		}
+
+		public static string UpdateBook(int id, string title, string author, string genre, int yearPublished, int checkedOut, DateTime checkOutDate, DateTime dueDate)
+		{
+
+			var connectionStrings = @"Server=localhost\SQLEXPRESS;Database=Libary;Trusted_Connection=True;";
+			using (var connection = new SqlConnection(connectionStrings))
+			{
+				using (var cmd = new SqlCommand())
+				{
+					cmd.Connection = connection;
+					cmd.CommandType = System.Data.CommandType.Text;
+					cmd.CommandText = @"UPDATE Catalog SET Title=@Title, Author=@Author, Genre=@Genre, Year_Published=@Year_Published, LastCheckedOutDate=@LastCheckedOutDate, DueBackDate=@DueBackDate " +
+										"WHERE Id = @Id";
+
+					cmd.Parameters.AddWithValue("@Title", title);
+					cmd.Parameters.AddWithValue("@Author", author);
+					cmd.Parameters.AddWithValue("@Genre", genre);
+					cmd.Parameters.AddWithValue("@Year_Published", yearPublished);
+					cmd.Parameters.AddWithValue("@IsCheckedOut", checkedOut);
+					cmd.Parameters.AddWithValue("@LastCheckedOutDate", checkOutDate.Date);
+					cmd.Parameters.AddWithValue("@DueBackDate", dueDate.Date);
+					cmd.Parameters.AddWithValue("@Id", id);
+
+					connection.Open();
+					var rowsAffected = cmd.ExecuteNonQuery();
+					connection.Close();
+
+					if (rowsAffected > 0)
+					{
+						return "Your Book was Updated";
+					}
+					else
+					{
+						return "The Update for your Book Failed!";
 					}
 				}
 			}

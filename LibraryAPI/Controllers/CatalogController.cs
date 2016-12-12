@@ -38,36 +38,27 @@ namespace LibraryAPI.Controllers
 		*/
 		 
 		[HttpPut]
-		public string AddBook(string title, string author, string genre, int yearPublished)
+		public IHttpActionResult AddBook(string title, string author, string genre, int yearPublished)
 		{
 			var message = BookService.AddBook(title, author, genre, yearPublished);
-			//var p = new Person { Name = name, FavoriteMovie = movie };
-			//People.Add(p);
-			return message;
+			return Ok(message);
 		}
-		/*
+		
 		[HttpPost]
-		public IHttpActionResult UpdateBook(Book updated)
+		public IHttpActionResult UpdateBook(int id, string title, string author, string genre, int yearPublished, bool isCheckedOut, DateTime checkOutDate, DateTime dueDate)
 		{
-			//var found = People.FirstOrDefault(f => f.Id == updated.Id);
-			//if (found == null)
-			//{
-			//	return NotFound();
-			//}
-			//else
-			//{
-			//	found.Name = updated.Name;
-			//	found.FavoriteMovie = updated.FavoriteMovie;
-			//	return Ok(found);
-			//}
-		}
+			var checkedOut = isCheckedOut ? 1 : 0;
+			var message = BookService.UpdateBook(id, title, author, genre, yearPublished, checkedOut, checkOutDate, dueDate);
+			return Ok(message);
 
+		}
+		
 		[HttpDelete]
 		public IHttpActionResult DeleteBook(int id)
 		{
 			//People = People.Where(w => w.Id != id).ToList();
 			return Ok();
 		}
-		*/
+		
 	}
 }
