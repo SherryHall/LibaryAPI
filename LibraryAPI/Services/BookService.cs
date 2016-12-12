@@ -17,6 +17,7 @@ namespace LibraryAPI.Services
 
 		public static List<Book> BuildBookList(string currQuery)
 		{
+			Books.Clear();
 			var connectionStrings = @"Server=localhost\SQLEXPRESS;Database=Libary;Trusted_Connection=True;";
 			using (var connection = new SqlConnection(connectionStrings))
 			{
@@ -143,7 +144,7 @@ namespace LibraryAPI.Services
 			}
 		}
 
-		public static string UpdateCheckout(int id, int checkedOut, DateTime? outDate, DateTime? dueDate)
+		public static string UpdateCheckout(int id, int checkedOut, DateTime? outDate, DateTime? dueDate, string action)
 		{
 			var connectionStrings = @"Server=localhost\SQLEXPRESS;Database=Libary;Trusted_Connection=True;";
 			using (var connection = new SqlConnection(connectionStrings))
@@ -166,7 +167,7 @@ namespace LibraryAPI.Services
 
 					if (rowsAffected > 0)
 					{
-						return "Your Book was Updated";
+						return $"Requested Book has been Checked {action}";
 					}
 					else
 					{
@@ -179,11 +180,12 @@ namespace LibraryAPI.Services
 		public static string CheckInOrOut(int id, string action)
 		{
 			// Get current info for the book requested
-			Books = BuildBookList(@"SELECT * from Catalog WHERE Id = id");
+			string message = String.Empty;
+			Books = BuildBookList($@"SELECT * from Catalog WHERE Id = {id}");
 			if (Books.Count < 1)
 			{
 				// The book was not found. Set a message and do nothing else
-				var message = "Requested Book Does Not Exist";
+				message = "Requested Book Does Not Exist";
 			}
 			else
 
@@ -193,14 +195,14 @@ namespace LibraryAPI.Services
 				var checkedOut = 0;
 				var outDate = Books[0].LastCheckedOutDate;
 				var dueDate = Books[0].DueBackDate;
-				var message = UpdateCheckout(id, checkedOut, outDate, dueDate);
+				message = UpdateCheckout(id, checkedOut, outDate, dueDate, action);
 			}
 			else if (action.ToLower().Equals("out"))
 
 				// Checkout requested.  If the book is already checked out, return a message, otherwide update the database to checkout book
 				if (Books[0].IsCheckedOut)
 				{
-					var message = $"This books is already checked out. Return date is {Books[0].DueBackDate})";
+					message = $"{Books[0].Title} is already checked out. Return date is {Books[0].DueBackDate})";
 				}
 				else
 				{
@@ -209,12 +211,12 @@ namespace LibraryAPI.Services
 					var checkedOut = 1;
 					var outDate = DateTime.Today.Date;
 					var dueDate = outDate.AddDays(10);
-					var message = UpdateCheckout(id, checkedOut, outDate, dueDate);
+					message = UpdateCheckout(id, checkedOut, outDate, dueDate, action);
 				}
 			else
 			{
 				// the action requested was neither IN nor OUT, so it is invalid
-				var message = "Invalid Checkout Action Requested";
+				message = "Invalid Checkout Action Requested";
 			}
 			return message;
 		}

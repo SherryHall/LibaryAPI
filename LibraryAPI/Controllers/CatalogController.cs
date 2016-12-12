@@ -65,7 +65,7 @@ namespace LibraryAPI.Controllers
 		public IHttpActionResult DeleteBook(int id)
 		{
 			var message = BookService.DeleteBook(id);
-			return Ok();
+			return Ok(message);
 		}
 		
 	}
